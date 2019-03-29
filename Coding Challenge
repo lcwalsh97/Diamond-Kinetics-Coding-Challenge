@@ -120,6 +120,8 @@ def main():
 
 main()
 
-
+##### BONUS #####
+# From looking at the acceleration data in the csv file, it appears that the
+# impact occurs somewhere around index 877 where the accelerations drastically change.
 
 
