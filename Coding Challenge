@@ -1,0 +1,125 @@
+
+# Diamond Kinetics Coding Challenge
+
+import csv
+
+def init(data):
+    data.time = []
+    data.acc = [[],[],[]]
+    data.pos = [[],[],[]]
+
+class Struct(object): pass
+
+with open('latestSwing.csv') as csv_file:
+    data = Struct()
+    init(data)
+    # csv reader code taken from https://realpython.com/python-csv/
+    csv_reader = csv.reader(csv_file, delimiter=',')
+    line_count = 0
+    # Check each row in csv file
+    for row in csv_reader:
+        # Append time, acceleration, and position
+        data.time.append(float(row[0]))
+        data.acc[0].append(float(row[1]))
+        data.acc[1].append(float(row[2]))
+        data.acc[2].append(float(row[3]))
+        data.pos[0].append(float(row[4]))
+        data.pos[1].append(float(row[5]))
+        data.pos[2].append(float(row[6]))
+        # Next row
+        line_count += 1
+
+def searchContinuityAboveValue(data, indexBegin, indexEnd, threshold, 
+                               winLength):
+    # Looking at x accelation
+    ax = data.acc[0]
+    winCurrent = 0
+    for i in range(indexBegin, indexEnd):
+        if (ax[i]>threshold):
+            if (winCurrent==0):
+                indexCurrent = i
+            winCurrent += 1
+            if (winCurrent==winLength):
+                return indexCurrent
+        else:
+            winCurrent = 0
+    return 
+
+def backSearchContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, 
+                                    thresholdHi, winLength):
+    # Looking at x accelation
+    ax = data.acc[0]
+    winCurrent = 0
+    for i in range(indexBegin, indexEnd, -1):
+        if (ax[i]>thresholdLo) and (ax[i]<thresholdHi):
+            if (winCurrent==0):
+                indexCurrent = i
+            winCurrent += 1
+            if (winCurrent==winLength):
+                return indexCurrent
+        else:
+            winCurrent = 0
+    return 
+
+def searchContinuityAboveValueTwoSignals(data, indexBegin, indexEnd, 
+                                         threshold1, threshold2, winLength):
+    # Looking at x accelation and y acceleration
+    ax = data.acc[0]
+    ay = data.acc[1]
+    winCurrent = 0
+    for i in range(indexBegin, indexEnd):
+        if (ax[i]>threshold1) and (ay[i]>threshold2):
+            if (winCurrent==0):
+                indexCurrent = i
+            winCurrent += 1
+            if (winCurrent==winLength):
+                return indexCurrent
+        else:
+            winCurrent = 0
+    return 
+
+def searchMultiContinuityWithinRange(data, indexBegin, indexEnd, thresholdLo, 
+                                     thresholdHi, winLength):
+    # Looking at x accelation
+    ax = data.acc[0]
+    winCurrent = 0
+    indexes = []
+    for i in range(indexBegin,indexEnd):
+        if (ax[i]>thresholdLo) and (ax[i]<thresholdHi):
+            if (winCurrent==0):
+                indexCurrent = i
+            winCurrent += 1
+        elif (winCurrent>=winLength):
+            # Inpdexes are in the form: [start,end]
+            indexes.append([indexCurrent, indexCurrent+winCurrent])
+            winCurrent = 0
+        else:
+            winCurrent = 0
+    return indexes
+
+def testAll():
+    # Tests each function with sample inputs
+    assert(searchContinuityAboveValue(data, 0, 1000, 0.5, 5) == 26)
+    assert(searchContinuityAboveValue(data, 500, 1500, 0.5, 5) == 500)
+
+    assert(backSearchContinuityWithinRange(data, 1000, 0, 0, 1, 2) == 926)
+    assert(backSearchContinuityWithinRange(data, 1000, 0, 0, 1, 10) == 743)
+
+    assert(searchContinuityAboveValueTwoSignals(data, 0, 1000, 0.5, 0.5, 5) == 26)
+    assert(searchContinuityAboveValueTwoSignals(data, 500, 1500, 0.5, 0.5, 5) == 920)
+
+    assert(searchMultiContinuityWithinRange(data, 0, 1000, 0, 5, 5) == 
+                                            [[20,744],[920,927]])
+    assert(searchMultiContinuityWithinRange(data, 0, 1000, -1, 1, 5) ==
+                                            [[4,37],[73,287],[331,336], 
+                                             [337, 476],[477,622],[647,778]])
+
+def main():
+    #testAll()
+    pass
+
+main()
+
+
+
+
